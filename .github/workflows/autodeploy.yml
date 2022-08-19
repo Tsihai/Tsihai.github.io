@@ -1,0 +1,62 @@
+name: 自动部署
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查分支
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: 安装 Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: 安装 Hexo
+        run: |
+          export TZ='Asia/Shanghai'
+          npm install hexo-cli -g
+
+      - name: 缓存 Hexo
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{runner.OS}}-${{hashFiles('**/package-lock.json')}}
+
+      - name: 安装依赖
+        if: steps.cache.outputs-cache-hit ≠ true
+        run:
+          npm install --save
+
+      - name: 生成静态文件
+        run:
+          hexo clean
+          hexo generate
+
+      - name: 提交到 Github Pages
+        run:
+          git config --global user.name "Tsihai"
+          git config --global user.email "13169186610@163.com"
+          git clone https://github.com/Tsihai/Tsihai.github.io.git .deploy_git
+          hexo deploy
+
+      - name: 部署到云服务器
+        uses: cross-the-world/scp-pipeline@main
+        with:
+          host: ${{ secrets.USER_HOST }}
+          user: ${{ secrets.USER_NAME }}
+          pass: ${{ secrets.USER_PASS }}
+          connect_timeout: 10
+          local: './deploy_git/*'
+          remote: /www/wwwroot/sihai559.blog.cn
