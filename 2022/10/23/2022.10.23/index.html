@@ -1,0 +1,303 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySql8 Docker下配置主从复制环境（Windows） | 四海</title><meta name="author" content="sihai"><meta name="copyright" content="sihai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从 Docker 下拉取最新的 Mysql, 运行配置1. 打开命令符, 拉取镜像文件1docker pull mysql 2. 运行镜像创建两个数据库：mysql-1为主库(33061)mysql-2为从库(33062)     –name 后面跟着的是容器的名字,自己可以自定义    -p 指的"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://tsihai.github.io/2022/10/23/2022.10.23/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySql8 Docker下配置主从复制环境（Windows）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-11-17 02:59:53'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/sihai.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/sihai.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 链接</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/index_img.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="四海"><span class="site-name">四海</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 链接</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">MySql8 Docker下配置主从复制环境（Windows）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2022-10-22T16:00:00.000Z" title="发表于 2022-10-23 00:00:00">2022-10-23</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">891</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="MySql8 Docker下配置主从复制环境（Windows）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="从-Docker-下拉取最新的-Mysql-运行配置"><a href="#从-Docker-下拉取最新的-Mysql-运行配置" class="headerlink" title="从 Docker 下拉取最新的 Mysql, 运行配置"></a>从 Docker 下拉取最新的 Mysql, 运行配置</h2><h3 id="1-打开命令符-拉取镜像文件"><a href="#1-打开命令符-拉取镜像文件" class="headerlink" title="1. 打开命令符, 拉取镜像文件"></a>1. 打开命令符, 拉取镜像文件</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull mysql</span><br></pre></td></tr></table></figure>
+<h3 id="2-运行镜像创建两个数据库："><a href="#2-运行镜像创建两个数据库：" class="headerlink" title="2. 运行镜像创建两个数据库："></a>2. 运行镜像创建两个数据库：</h3><p><strong>mysql-1为主库(33061)<br>mysql-2为从库(33062)</strong></p>
+<blockquote>
+   –name 后面跟着的是容器的名字,自己可以自定义</br>
+   -p 指的是端口映射 本机端口:容器端口,本人选用的本机端口是3306,可以根据自己情况选择端口</br>
+   -e 指的是启动参数,这个MYSQL_ROOT_PASSWORD参数必须要传,否则等下登录不了MySQL, MYSQL_ROOT_PASSWORD意思是root用户的密码,大家可以自定义</br>
+   -d 代表后台启动 后面跟的就是镜像的名字,因为之前拉取的时候就是docker pull mysql,所以这个写mysql,如果是 docker pull mysql:5.7 那么这里就是 -d msyql:5.7</br>
+</blockquote>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql-<span class="number">1</span> -p <span class="number">33061</span>:<span class="number">3306</span> -e MYSQL_ROOT_PASSWORD=root -d mysql:<span class="number">8</span>.<span class="number">0</span> </span><br><span class="line">--character-<span class="built_in">set</span>-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</span><br><span class="line"></span><br><span class="line">docker run --name mysql-<span class="number">2</span> -p <span class="number">33062</span>:<span class="number">3306</span> -e MYSQL_ROOT_PASSWORD=root -d mysql:<span class="number">8</span>.<span class="number">0</span> </span><br><span class="line">--character-<span class="built_in">set</span>-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</span><br></pre></td></tr></table></figure>
+<h3 id="3-查看-Docker-镜像是否运行成功"><a href="#3-查看-Docker-镜像是否运行成功" class="headerlink" title="3. 查看 Docker 镜像是否运行成功"></a>3. 查看 Docker 镜像是否运行成功</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+<h3 id="4-在数据库连接上mysql"><a href="#4-在数据库连接上mysql" class="headerlink" title="4. 在数据库连接上mysql"></a>4. 在数据库连接上mysql</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 连接名</span><br><span class="line"><span class="attr">name</span>: mysql-<span class="number">1</span></span><br><span class="line"># 主机</span><br><span class="line"><span class="attr">localhost</span>: <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"># 端口号</span><br><span class="line"><span class="attr">port</span>: <span class="number">33061</span></span><br><span class="line"># 用户名</span><br><span class="line"><span class="attr">username</span>: root</span><br><span class="line"># 密码</span><br><span class="line"><span class="attr">password</span>: root</span><br></pre></td></tr></table></figure>
+<h2 id="主机配置"><a href="#主机配置" class="headerlink" title="主机配置"></a>主机配置</h2><h3 id="1-在主机下配置用户-授权给从机服务器"><a href="#1-在主机下配置用户-授权给从机服务器" class="headerlink" title="1. 在主机下配置用户, 授权给从机服务器"></a>1. 在主机下配置用户, 授权给从机服务器</h3><p><strong>创建用户</strong><br>打开mysql-1 console, ‘rep1’为从机登录用户名, 密码为 root, ‘%’代表不需要限制登录地址(也可另外设置)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER &#x27;rep1&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;root&#x27;;</span><br></pre></td></tr></table></figure>
+<p><strong>用户授权</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRANT Replication Slave ON *.* TO &#x27;rep1&#x27;@&#x27;%&#x27;;</span><br></pre></td></tr></table></figure>
+<h3 id="2-修改主库配置文件"><a href="#2-修改主库配置文件" class="headerlink" title="2. 修改主库配置文件"></a>2. 修改主库配置文件</h3><p>桌面新建一个文件 <strong>“mysqld.cnf”</strong></p>
+<blockquote>
+    [mysqld]<br/>
+    log-bin=/var/lib/mysql/binlog<br/>
+    server-id=1<br/>
+    binlog-do-db = testdb<br/>
+    pid-file	= /var/run/mysqld/mysqld.pid<br/>
+    socket	= /var/run/mysqld/mysqld.sock<br/>
+    datadir	= /var/lib/mysql<br/>
+    #log-error	= /var/log/mysql/error.log<br/>
+    # By default we only accept connections from localhost<br/>
+    #bind-address	= 127.0.0.1<br/>
+    # Disabling symbolic-links is recommended to prevent assorted security risks<br/>
+    symbolic-links=0<br/>
+</blockquote>
+命令符中进入桌面, 把文件上传到 Docker配置里
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker cp ./mysqld.cnf mysql-<span class="number">1</span>:/etc/mysql/mysql.conf.d/</span><br></pre></td></tr></table></figure>
+<p>重新启动 Mysql-1 服务端：</p>
+<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart mysql-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-确认主库配置是否成功"><a href="#3-确认主库配置是否成功" class="headerlink" title="3. 确认主库配置是否成功"></a>3. 确认主库配置是否成功</h3><p>打开Nacvicat Premium, mysql-1服务端中：<br>console查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> master status;</span><br></pre></td></tr></table></figure>
+<blockquote>
+binlog.000001<br/>
+154<br/>
+testdb<br/>
+</blockquote>
+
+<h2 id="从机配置"><a href="#从机配置" class="headerlink" title="从机配置"></a>从机配置</h2><h3 id="1-修改从库配置文件"><a href="#1-修改从库配置文件" class="headerlink" title="1. 修改从库配置文件"></a>1. 修改从库配置文件</h3><p>桌面新建一个文件 <strong>“mysqld.cnf”</strong><br><strong>注意从机这里只需要配置一下 server-id 即可。</strong></p>
+<blockquote>
+    [mysqld]<br/>
+    server-id=2<br/>
+    pid-file	= /var/run/mysqld/mysqld.pid<br/>
+    socket	= /var/run/mysqld/mysqld.sock<br/>
+    datadir	= /var/lib/mysql<br/>
+    #log-error	= /var/log/mysql/error.log<br/>
+    # By default we only accept connections from localhost<br/>
+    #bind-address	= 127.0.0.1<br/>
+    # Disabling symbolic-links is recommended to prevent assorted security risks<br/>
+    symbolic-links=0<br/>
+</blockquote>
+
+<h3 id="2-命令符中进入桌面-把文件上传到-Docker配置里"><a href="#2-命令符中进入桌面-把文件上传到-Docker配置里" class="headerlink" title="2. 命令符中进入桌面, 把文件上传到 Docker配置里"></a>2. 命令符中进入桌面, 把文件上传到 Docker配置里</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker cp ./mysqld.cnf mysql-<span class="number">2</span>:/etc/mysql/mysql.conf.d/</span><br></pre></td></tr></table></figure>
+<p>重新启动 Mysql-2 服务端：</p>
+<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart mysql-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-进入-Mysql-2容器"><a href="#3-进入-Mysql-2容器" class="headerlink" title="3. 进入 Mysql-2容器"></a>3. 进入 Mysql-2容器</h3><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it mysql-<span class="number">2</span> /bin/bash</span><br></pre></td></tr></table></figure>
+<h3 id="4-登录-Mysql"><a href="#4-登录-Mysql" class="headerlink" title="4. 登录 Mysql"></a>4. 登录 Mysql</h3><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+<p><strong>登陆密码Enter password: root</strong></p>
+<h3 id="5-使用命令配置从机"><a href="#5-使用命令配置从机" class="headerlink" title="5. 使用命令配置从机"></a>5. 使用命令配置从机</h3><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">change master to master_host=<span class="string">&#x27;192.168.101.218&#x27;</span>,master_port=<span class="number">33061</span>,master_user=<span class="string">&#x27;rep1&#x27;</span>,master_password=<span class="string">&#x27;root&#x27;</span>,master_log_file=<span class="string">&#x27;binlog.000001&#x27;</span>,master_log_pos=<span class="number">154</span>,get_master_public_key=<span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<p>这里配置主机地址、端口以及从机登录主机的用户名和密码，注意最后两个参数要和 master 中的保持一致。</p>
+<h3 id="6-启动slave进程"><a href="#6-启动slave进程" class="headerlink" title="6. 启动slave进程"></a>6. 启动slave进程</h3><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">start slave;</span><br></pre></td></tr></table></figure>
+<p>查看从机状态：</p>
+<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show slave status\G;</span><br></pre></td></tr></table></figure>
+<p>下面两项值都要为 YES，则表示配置正确：</p>
+<blockquote>
+
+<p><strong>Slave_IO_Running: Yes</strong><br/><br><strong>Slave_SQL_Running: Yes</strong></p>
+</blockquote>
+
+<p>至此，配置完成，主机创建库，添加数据，从机会自动同步。<br>如果这两个有一个不为 YES ，表示主从环境搭建失败，此时可以阅读日志，查看出错的原因，再具体问题具体解决。</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/cover/365237.jpg" data-sites="qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/11/04/2022.11.04/" title="ElasticSearch"><img class="cover" src="/img/cover/365234.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">ElasticSearch</div></div></a></div><div class="next-post pull-right"><a href="/2022/10/09/2022.10.09/" title="Vue3 中自定义插件"><img class="cover" src="/img/cover/365479.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Vue3 中自定义插件</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-Docker-%E4%B8%8B%E6%8B%89%E5%8F%96%E6%9C%80%E6%96%B0%E7%9A%84-Mysql-%E8%BF%90%E8%A1%8C%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">从 Docker 下拉取最新的 Mysql, 运行配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%89%93%E5%BC%80%E5%91%BD%E4%BB%A4%E7%AC%A6-%E6%8B%89%E5%8F%96%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6"><span class="toc-number">1.1.</span> <span class="toc-text">1. 打开命令符, 拉取镜像文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%BF%90%E8%A1%8C%E9%95%9C%E5%83%8F%E5%88%9B%E5%BB%BA%E4%B8%A4%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%9A"><span class="toc-number">1.2.</span> <span class="toc-text">2. 运行镜像创建两个数据库：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%9F%A5%E7%9C%8B-Docker-%E9%95%9C%E5%83%8F%E6%98%AF%E5%90%A6%E8%BF%90%E8%A1%8C%E6%88%90%E5%8A%9F"><span class="toc-number">1.3.</span> <span class="toc-text">3. 查看 Docker 镜像是否运行成功</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%9C%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E4%B8%8Amysql"><span class="toc-number">1.4.</span> <span class="toc-text">4. 在数据库连接上mysql</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E6%9C%BA%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">主机配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9C%A8%E4%B8%BB%E6%9C%BA%E4%B8%8B%E9%85%8D%E7%BD%AE%E7%94%A8%E6%88%B7-%E6%8E%88%E6%9D%83%E7%BB%99%E4%BB%8E%E6%9C%BA%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">2.1.</span> <span class="toc-text">1. 在主机下配置用户, 授权给从机服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BF%AE%E6%94%B9%E4%B8%BB%E5%BA%93%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.</span> <span class="toc-text">2. 修改主库配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%A1%AE%E8%AE%A4%E4%B8%BB%E5%BA%93%E9%85%8D%E7%BD%AE%E6%98%AF%E5%90%A6%E6%88%90%E5%8A%9F"><span class="toc-number">2.3.</span> <span class="toc-text">3. 确认主库配置是否成功</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E6%9C%BA%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">从机配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BF%AE%E6%94%B9%E4%BB%8E%E5%BA%93%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">1. 修改从库配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%91%BD%E4%BB%A4%E7%AC%A6%E4%B8%AD%E8%BF%9B%E5%85%A5%E6%A1%8C%E9%9D%A2-%E6%8A%8A%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%88%B0-Docker%E9%85%8D%E7%BD%AE%E9%87%8C"><span class="toc-number">3.2.</span> <span class="toc-text">2. 命令符中进入桌面, 把文件上传到 Docker配置里</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%BF%9B%E5%85%A5-Mysql-2%E5%AE%B9%E5%99%A8"><span class="toc-number">3.3.</span> <span class="toc-text">3. 进入 Mysql-2容器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E7%99%BB%E5%BD%95-Mysql"><span class="toc-number">3.4.</span> <span class="toc-text">4. 登录 Mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%BA"><span class="toc-number">3.5.</span> <span class="toc-text">5. 使用命令配置从机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%90%AF%E5%8A%A8slave%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.6.</span> <span class="toc-text">6. 启动slave进程</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By sihai</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"log":false});</script></body></html>
