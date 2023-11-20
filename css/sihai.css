@@ -46,3 +46,11 @@
 #web_bg {
     background-image: url("../img/index_img.jpg")
 }
+
+#aside-content .card-widget {
+    background: rgba(255, 255, 255, .8);
+}
+
+#aside-content .aside-list > .aside-list-item:not(:last-child) {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0);
+}
