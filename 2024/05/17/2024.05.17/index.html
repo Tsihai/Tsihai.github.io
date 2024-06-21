@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Etcd | 四海</title><meta name="author" content="sihai"><meta name="copyright" content="sihai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="注册中心应该有什么核心能力？ 服务注册：服务提供者上报服务信息到注册中心。 服务发现：服务消费者从注册中心获取服务提供者信息。 心跳检测：定期检查服务提供者存活状态，如果服务提供者挂了，则从注册中心删除服务提供者信息。 服务注销：手动剔除节点、或者自动剔除失效节点。 数据分布式存储：集中的服务注册信"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://tsihai.github.io/2024/05/17/2024.05.17/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Etcd',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-06-21 16:56:55'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/sihai.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/sihai.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/index_img.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="四海"><span class="site-name">四海</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Etcd</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2024-05-16T16:00:00.000Z" title="发表于 2024-05-17 00:00:00">2024-05-17</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Etcd"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="注册中心应该有什么核心能力？"><a href="#注册中心应该有什么核心能力？" class="headerlink" title="注册中心应该有什么核心能力？"></a>注册中心应该有什么核心能力？</h2><ol>
+<li>服务注册：服务提供者上报服务信息到注册中心。</li>
+<li>服务发现：服务消费者从注册中心获取服务提供者信息。</li>
+<li>心跳检测：定期检查服务提供者存活状态，如果服务提供者挂了，则从注册中心删除服务提供者信息。</li>
+<li>服务注销：手动剔除节点、或者自动剔除失效节点。</li>
+<li>数据分布式存储：集中的服务注册信息数据存储、读取和共享。</li>
+<li>更多的优点：比如注册中心本身的容错、服务消费者缓存等。<hr/></li>
+</ol>
+<h2 id="Etcd"><a href="#Etcd" class="headerlink" title="Etcd"></a>Etcd</h2><p>官方网站：<a target="_blank" rel="noopener" href="https://github.com/etcd-io/etcd">https://github.com/etcd-io/etcd</a></p>
+<hr/>
+### Etcd 介绍
+Etcd 是一个 Go 语言实现的、开源的、分布式的键值存储系统，他主要用于分布式系统中的服务发现、配置管理和分布式锁等场景。
+
+<p>当提到 Go 语言实现，我们就可以想得到，Etcd 的性能是非常高的，而且它和云原生有密切的关系，通常被作为云原生应用的配置中心、基础设施，存储一些元信息。</p>
+<p>比如经典的容器管理平台 K8s 就是使用了Etcd 来存储集群配置信息、集群状态信息、节点信息等。</p>
+<p>除了性能高外，Etcd 采用 Raft 一致性算法，确保了在分布式环境中的数据强一致性和可靠性，具有高可用性、强一致性、分布式特性等特点。</p>
+<p>Etcd 非常简单易用，提供了简单的 Api、数据的过期机制、数据的监听和通知机制等，完美满足注册中心场景的需求。</p>
+<p>Etcd 的入门极低，只需要学过 Redis、Zookeeper 或者对象存储中的一个，就能够很快的理解 Etcd 并且投入实战运用。</p>
+<hr/>
+
+<h3 id="Etcd-数据结构与特征"><a href="#Etcd-数据结构与特征" class="headerlink" title="Etcd 数据结构与特征"></a>Etcd 数据结构与特征</h3><p>Etcd 在其数据模型和组织结构上更接近于 ZooKeeper 和对象存储，而不是 Redis。</p>
+<p>它使用层次化的键值对来存储数据，支持类似于文件系统路径的层次结构，能够很灵活地单 key 查询、按前缀查询、按范围查询。</p>
+<p>如下图：<br><img src="/../img/etcd/etcd.png" alt="etcd.png"></p>
+<hr/>
+
+<h4 id="Etcd-的核心数据结构"><a href="#Etcd-的核心数据结构" class="headerlink" title="Etcd 的核心数据结构"></a>Etcd 的核心数据结构</h4><ol>
+<li>Key：Etcd 中的基本数据单元，类似于文件系统中的文件名。每一个键都唯一标识一个值，并且可以包含子键，形成类似于路径的层次结构。</li>
+<li>Value：与键关联的数据，可以是任何类型的数据，通常是字符串形式。</li>
+</ol>
+<p>只有 Key 和 Value,所以我们可以将数据序列化后写入到 Value 中。</p>
+<hr/>
+
+<h4 id="Etcd-的核心特征"><a href="#Etcd-的核心特征" class="headerlink" title="Etcd 的核心特征"></a>Etcd 的核心特征</h4><ol>
+<li>Lease(租约)：用于对键值对进行 TTL 超时设置，也就是设置键值对的过期时间。当租约过期的时候，相关的键值对将被自动删除。</li>
+<li>Watch(监听)：用于监听特定键的变化，每当键的值发生变化时，会触发相应的回调函数。</li>
+</ol>
+<p>有了这些特性，我们就可以能够实现注册中心的服务提供者节点的过期和监听。</p>
+<hr/>
+
+<h3 id="Etcd-如何保证数据一致性？"><a href="#Etcd-如何保证数据一致性？" class="headerlink" title="Etcd 如何保证数据一致性？"></a>Etcd 如何保证数据一致性？</h3><p>Etcd 的一大优势就是能够保证数据的强一致性。</p>
+<ol>
+<li>从表层来看，Etcd 支持事务操作，能够保证数据一致性。</li>
+<li>从底层来看，Etcd 采用的是 Raft 算法来实现数据一致性。</li>
+</ol>
+<p>Raft 是一种分布式一致性算法，它确保了分布式系统中的所有节点在任何时间点都能达成一致的数据视图。</p>
+<ul>
+<li>具体来说， Raft算法是通过选举机制选举出一个领导者（Leader）节点，领导者负责接受客户端的写请求，并且将写请求操作复制到其他节点上。</li>
+<li>当客户端发送写请求时，领导者首先将写操作写入自己的日志中，并且将写操作的日志条目分发到其他节点，其他节点通过复制日志条目来保持一致性。</li>
+<li>一旦大多数节点（至少是超过半数的节点）都将该日志条目成功写入到自己的日志中，该日志条目则视为已提交，领导者则向客户端发送成功响应。</li>
+<li>在领导者发送成功响应后，该写操作就被视为成功提交，从而保证了数据的一致性。</li>
+<li>如果领导者节点挂了，其他节点会自动选举出新的领导者，保证数据的一致性。</li>
+<li>新的领导者会继续接收客户端的写请求，并将写请求操作复制到其他节点上，从而保证数据的一致性。<hr/></li>
+</ul>
+<h4 id="Playground"><a href="#Playground" class="headerlink" title="Playground"></a>Playground</h4><p>我们可以使用官方提供的 Etcd Playground 来可视化操作 Etcd，便于学习。</p>
+<p>官方网站：<a target="_blank" rel="noopener" href="http://play.etcd.io/play">http://play.etcd.io/play</a></p>
+<hr/>
+
+<h3 id="Etcd-安装"><a href="#Etcd-安装" class="headerlink" title="Etcd 安装"></a>Etcd 安装</h3><p>Etcd Github下载页：<a target="_blank" rel="noopener" href="https://github.com/etcd-io/etcd/releases">https://github.com/etcd-io/etcd/releases</a></p>
+<p>Etcd 官方下载：<a target="_blank" rel="noopener" href="https://etcd.io/docs/v3.2/install/">https://etcd.io/docs/v3.2/install/</a></p>
+<p>找到自己操作系统的版本执行即可，安装完成后，会得到 3 个脚本：</p>
+<ul>
+<li>etcd: etcd 服务端</li>
+<li>etcdctl: etcd 客户端，用于操作 etcd 服务端，比如读写数据等。</li>
+<li>etcdutl: etcd 备份恢复工具</li>
+</ul>
+<p>执行完 etcd 脚本后，就可以启动 etcd 服务，服务会默认监听 2379 和 2380 两个端口，作用分别如下：</p>
+<ul>
+<li>2379：提供 HTTP API 服务，和 etcdctl 通信。</li>
+<li>2380：急群中节点之间的通信。<hr/></li>
+</ul>
+<h3 id="Etcd-可视化工具"><a href="#Etcd-可视化工具" class="headerlink" title="Etcd 可视化工具"></a>Etcd 可视化工具</h3><p>一般情况下，我们使用数据存储中间件时，一定要有一个可视化工具，能够更直观清晰地管理已经存储的数据。</p>
+<p>比如 Redis 的 Redis Desktop Manager。</p>
+<p>同样的，Etcd 也有一些可视化工具，比如：</p>
+<ul>
+<li>etcdkeeper：️<a target="_blank" rel="noopener" href="https://github.com/evildecay/etcdkeeper/">https://github.com/evildecay/etcdkeeper/</a></li>
+<li>kstone：<a target="_blank" rel="noopener" href="https://github.com/kstone-io/kstone/tree/master/charts">https://github.com/kstone-io/kstone/tree/master/charts</a></li>
+</ul>
+<p><strong>推荐 etcdkeeper，安装成本更低，学习使用更方便。</strong></p>
+<p>进入项目的 GitHub，就能看到安装方式，直接按照指引下载、解压、运行脚本即可：<br><img src="/../img/etcd/etcd-1.png" alt="etcd-1.png"></p>
+<p>安装后，执行命令，可以在指定端口启动可视化界面（默认是 8080 端口），比如在 8081 端口启动。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./etcdkeeper -port <span class="number">8081</span></span><br></pre></td></tr></table></figure>
+
+<p>安装后，访问本地 <a target="_blank" rel="noopener" href="http://127.0.0.1:8081/etcdkeeper/">http://127.0.0.1:8081/etcdkeeper/</a> ，就能看到可视化页面了</p>
+<hr/>
+
+<h3 id="Etcd-Java-客户端"><a href="#Etcd-Java-客户端" class="headerlink" title="Etcd Java 客户端"></a>Etcd Java 客户端</h3><p>客户端，就是操作 Etcd 的工具。</p>
+<p>etcd 主流的 Java 客户端是 jetcd：<a target="_blank" rel="noopener" href="https://github.com/etcd-io/jetcd">https://github.com/etcd-io/jetcd</a></p>
+<p><strong>注意，Java 版本必须要大于 11</strong></p>
+<p>用法非常简单，就像 curator 能够操作 ZooKeeper、jedis 能够操作 Redis 一样。</p>
+<hr/>
+
+<h4 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/io.etcd/jetcd-core --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.etcd<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetcd-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.7.7<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EtcdRegistry</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException &#123;</span><br><span class="line">        <span class="comment">// create client using endpoints</span></span><br><span class="line">        <span class="type">Client</span> <span class="variable">client</span> <span class="operator">=</span> Client.builder().endpoints(<span class="string">&quot;http://localhost:2379&quot;</span>)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="type">KV</span> <span class="variable">kvClient</span> <span class="operator">=</span> client.getKVClient();</span><br><span class="line">        <span class="type">ByteSequence</span> <span class="variable">key</span> <span class="operator">=</span> ByteSequence.from(<span class="string">&quot;test_key&quot;</span>.getBytes());</span><br><span class="line">        <span class="type">ByteSequence</span> <span class="variable">value</span> <span class="operator">=</span> ByteSequence.from(<span class="string">&quot;test_value&quot;</span>.getBytes());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// put the key-value</span></span><br><span class="line">        kvClient.put(key, value).get();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// get the CompletableFuture</span></span><br><span class="line">        CompletableFuture&lt;GetResponse&gt; getFuture = kvClient.get(key);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// get the value from CompletableFuture</span></span><br><span class="line">        <span class="type">GetResponse</span> <span class="variable">response</span> <span class="operator">=</span> getFuture.get();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// delete the key</span></span><br><span class="line">        kvClient.delete(key).get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述代码中，我们使用 KVClient 来操作 etcd 写入和读取数据。</p>
+<p>除了 KVClient 客户端外，Etcd 还提供了很多其他客户端。</p>
+<p><img src="/../img/etcd/etcd-3.png" alt="etcd-3.png"></p>
+<hr/>
+
+<h4 id="常用的客户端和作用如下："><a href="#常用的客户端和作用如下：" class="headerlink" title="常用的客户端和作用如下："></a>常用的客户端和作用如下：</h4><ol>
+<li>kvClient：用于对 etcd 中的键值对进行操作。通过 kvClient 可以进行设置值、获取值、删除值、列出目录等操作。 </li>
+<li>leaseClient：用于管理 etcd 的租约机制。租约是 etcd 中的一种时间片，用于为键值对分配生存时间，并在租约到期时自动删除相关的键值对。通过 leaseClient 可以创建、获取、续约和撤销租约。 </li>
+<li>watchClient：用于监视 etcd 中键的变化，并在键的值发生变化时接收通知。 </li>
+<li>clusterClient：用于与 etcd 集群进行交互，包括添加、移除、列出成员、设置选举、获取集群的健康状态、获取成员列表信息等操作。 </li>
+<li>authClient：用于管理 etcd 的身份验证和授权。通过 authClient 可以添加、删除、列出用户、角色等身份信息，以及授予或撤销用户或角色的权限。 </li>
+<li>maintenanceClient：用于执行 etcd 的维护操作，如健康检查、数据库备份、成员维护、数据库快照、数据库压缩等。 </li>
+<li>lockClient：用于实现分布式锁功能，通过 lockClient 可以在 etcd 上创建、获取、释放锁，能够轻松实现并发控制。 </li>
+<li>electionClient：用于实现分布式选举功能，可以在 etcd 上创建选举、提交选票、监视选举结果等。</li>
+</ol>
+<p>绝大多数情况下，用前 3 个客户端就足够了，其余的仅做了解。</p>
+<hr/>
+
+<h4 id="Debug-代码"><a href="#Debug-代码" class="headerlink" title="Debug 代码"></a>Debug 代码</h4><p>使用 Debug 执行上述代码，观察 Etcd 的数据结构，如图：<br><img src="/../img/etcd/etcd-4.png" alt="etcd-4.png"></p>
+<p>发现除了 key 和 value 外，还有 revision、create_revision 和 mod_revision，它们分别代表键的版本号、创建时间戳和修改时间戳。</p>
+<p>这是因为 etcd 中的每一个键都有一个与之关联的版本号，用于跟踪键的修改历史，每当一个键的值发生变化时，它的版本号都会增加。</p>
+<p>通过使用 etcd 的 Watch API，我们可以实时监听键的变化，并在键的值发生变化时接收通知。</p>
+<p>这种版本号的机制，使得 etcd 可以实现在分布式系统中高效的实现乐观并发控制、一致性和可靠性的数据访问。</p>
+<hr/>
+
+<h2 id="存储结构设计"><a href="#存储结构设计" class="headerlink" title="存储结构设计"></a>存储结构设计</h2><p>了解了 Etcd 的基本使用后，还需要设计服务注册信息如何存储在注册中心内。</p>
+<p><strong>存储结构设计的几个要点：</strong></p>
+<ol>
+<li>key 如何设计？</li>
+<li>value 如何设计？</li>
+<li>key 什么时候过期？</li>
+</ol>
+<hr/>
+
+<p>由于一个服务可能有多个服务提供者（负载均衡），我们可以有两种结构设计：</p>
+<h3 id="层级结构"><a href="#层级结构" class="headerlink" title="层级结构"></a>层级结构</h3><p>将服务理解为文件夹，将服务对应的多个节点理解为文件夹下的子文件。</p>
+<p>那么就可以通过服务名称，使用前缀查询的方法，获取到该服务的所有节点。</p>
+<p>键名的规则可以是：&#x2F;业务前缀&#x2F;服务名&#x2F;服务节点地址</p>
+<pre>
+服务A: key = /service
+服务A节点1: key = /service/node1
+服务A节点2: key = /service/node2
+服务A节点3: key = /service/node3
+</pre>
+<hr/>
+
+<h3 id="列表结构"><a href="#列表结构" class="headerlink" title="列表结构"></a>列表结构</h3><p>将服务理解为列表，将服务对应的多个节点理解为列表中的元素。</p>
+<pre>
+服务A: key = service
+服务A节点1: key = node1
+服务A节点2: key = node2
+服务A节点3: key = node3
+</pre>
+
+<hr/>
+
+<p>选择哪种存储结构呢？这个也会跟我们的技术选型有关。</p>
+<p>对于 ZooKeeper 和 Etcd 这种支持层级查询的中间件，用第一种结构会更清晰。</p>
+<p>对于 Redis，由于本身就支持列表数据结构，可以选择第二种结构。</p>
+<p>最后，必须要给 key 设置过期时间，比如默认 30秒过期时间，这样如果服务提供者宕机了，也可以超时后自动移除。</p>
+<hr/>
+
+<h2 id="Etcd-开发实现"><a href="#Etcd-开发实现" class="headerlink" title="Etcd 开发实现"></a>Etcd 开发实现</h2><h3 id="注册中心开发"><a href="#注册中心开发" class="headerlink" title="注册中心开发"></a>注册中心开发</h3><h4 id="注册信息定义"><a href="#注册信息定义" class="headerlink" title="注册信息定义"></a>注册信息定义</h4><p>在 model 包下定义服务注册信息类 <code>ServiceMetaInfo</code>，用于封装服务的注册信息，包括服务名称、服务版本号、服务地址（域名和端口号）、服务分组等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 服务元信息（注册信息）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ServiceMetaInfo</span> &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String serviceName;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务版本号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">serviceVersion</span> <span class="operator">=</span> <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务域名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String serviceHost;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务端口号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Integer servicePort;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务分组（暂未实现）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">serviceGroup</span> <span class="operator">=</span> <span class="string">&quot;default&quot;</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外还需要给<code>ServiceMetaInfo</code>类增加一些工具方法，用于获取服务注册信息的键名、获取服务注册节点的键名等。</p>
+<p>可以把版本号和分组都放到服务键名中，就可以在查询时根据这些参数获取对应的版本和分组的服务。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 获取服务键名</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">getServiceKey</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 后续可扩展服务分组</span></span><br><span class="line">    <span class="comment">// return String.format(&quot;%s:%s:%s&quot;, serviceName, serviceVersion, serviceGroup);</span></span><br><span class="line">    <span class="keyword">return</span> String.format(<span class="string">&quot;%s:%s&quot;</span>, serviceName, serviceVersion);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 获取服务注册节点键名</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">getServiceNodeKey</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> String.format(<span class="string">&quot;%s/%s:%s&quot;</span>, getServiceKey(), serviceHost, servicePort);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于注册信息中包含了服务版本号字段，所以我们也可以给 RpcRequest 对象补充服务版本号字段，可以先作为预留字段，后续再实现。</p>
+<p>在 <code>RpcConstant</code> 常量类中补充默认服务版本号常量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * RPC 相关常量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RpcConstant</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认配置文件加载前缀</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">DEFAULT_CONFIG_PREFIX</span> <span class="operator">=</span> <span class="string">&quot;rpc&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认服务版本</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">DEFAULT_SERVICE_VERSION</span> <span class="operator">=</span> <span class="string">&quot;1.0&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>RpcRequest</code> 请求类中使用该常量，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * RPC 请求</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Builder</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RpcRequest</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String serviceName;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 方法名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String methodName;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务版本</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">serviceVersion</span> <span class="operator">=</span> RpcConstant.DEFAULT_SERVICE_VERSION;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 参数类型列表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Class&lt;?&gt;[] parameterTypes;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 参数列表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Object[] args;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="注册中心配置"><a href="#注册中心配置" class="headerlink" title="注册中心配置"></a>注册中心配置</h4><p>在 config 包下编写注册中心配置类 <code>RegistryConfig</code>，让用户配置连接注册中心所需的信息，比如注册中心类别、注册中心地址、用户名、密码、连接超时时间等。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * RPC 框架注册中心配置</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RegistryConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册中心类别</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">registry</span> <span class="operator">=</span> <span class="string">&quot;etcd&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册中心地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">address</span> <span class="operator">=</span> <span class="string">&quot;http://localhost:2380&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用户名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String username;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 密码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String password;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 超时时间（单位毫秒）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">Long</span> <span class="variable">timeout</span> <span class="operator">=</span> <span class="number">10000L</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还要为 <code>RpcConfig</code> 全局配置补充注册中心配置，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RpcConfig</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册中心配置</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">RegistryConfig</span> <span class="variable">registryConfig</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RegistryConfig</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="注册中心接口"><a href="#注册中心接口" class="headerlink" title="注册中心接口"></a>注册中心接口</h4><p>遵循可拓展的设计原则，所以先写一个注册中心接口，后续可以实现多种不同的注册中心，并且和序列化器一样，可以使用 SPI 机制来动态加载。</p>
+<p>注册中心接口主要提供了初始化、注册服务、注销服务、服务发现（获取服务节点列表）、服务销毁等方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册中心接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Registry</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始化</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> registryConfig</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(RegistryConfig registryConfig)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注册服务（服务端）</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serviceMetaInfo</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(ServiceMetaInfo serviceMetaInfo)</span> <span class="keyword">throws</span> Exception;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注销服务（服务端）</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serviceMetaInfo</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">unRegister</span><span class="params">(ServiceMetaInfo serviceMetaInfo)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务发现（获取某服务的所有节点，消费端）</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serviceKey 服务键名</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    List&lt;ServiceMetaInfo&gt; <span class="title function_">serviceDiscovery</span><span class="params">(String serviceKey)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务销毁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="Etcd-注册中心实现"><a href="#Etcd-注册中心实现" class="headerlink" title="Etcd 注册中心实现"></a>Etcd 注册中心实现</h4><h5 id="注册中心初始化"><a href="#注册中心初始化" class="headerlink" title="注册中心初始化"></a>注册中心初始化</h5><p>在 registry 目录下新建 Etcd 注册中心类 <code>EtcdRegistry</code>，实现注册中心接口，先完成初始化，读取注册中心配置并初始化客户端对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Etcd 注册中心类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EtcdRegistry</span> <span class="keyword">implements</span> <span class="title class_">Registry</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Client client;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> KV kvClient;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根节点，定义 Etcd 键存储的根路径为 /rpc/，为了区分不同的项目。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">ETCD_ROOT_PATH</span> <span class="operator">=</span> <span class="string">&quot;/rpc/&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(RegistryConfig registryConfig)</span> &#123;</span><br><span class="line">        client = Client.builder().endpoints(registryConfig.getAddress()).connectTimeout(Duration.ofMillis(registryConfig.getTimeout())).build();</span><br><span class="line">        kvClient = client.getKVClient();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h5 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h5><p>创建 key 并设置过期时间，value 为服务注册信息的 JSON 序列化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 服务注册</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(ServiceMetaInfo serviceMetaInfo)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="comment">// 创建 Lease 和 KV 客户端</span></span><br><span class="line">    <span class="type">Lease</span> <span class="variable">leaseClient</span> <span class="operator">=</span> client.getLeaseClient();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建一个 30 秒的 Lease</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">leaseId</span> <span class="operator">=</span> leaseClient.grant(<span class="number">30</span>).get().getID();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置要存储的键值对</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">registerKey</span> <span class="operator">=</span> ETCD_ROOT_PATH + serviceMetaInfo.getServiceNodeKey();</span><br><span class="line">    <span class="type">ByteSequence</span> <span class="variable">key</span> <span class="operator">=</span> ByteSequence.from(registerKey, StandardCharsets.UTF_8);</span><br><span class="line">    <span class="type">ByteSequence</span> <span class="variable">value</span> <span class="operator">=</span> ByteSequence.from(JSONUtil.toJsonStr(serviceMetaInfo), StandardCharsets.UTF_8);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将键值对与租约关联起来，并设置过期时间</span></span><br><span class="line">    <span class="type">PutOption</span> <span class="variable">putOption</span> <span class="operator">=</span> PutOption.builder().withLeaseId(leaseId).build();</span><br><span class="line">    kvClient.put(key, value, putOption).get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h5 id="服务注销"><a href="#服务注销" class="headerlink" title="服务注销"></a>服务注销</h5><p>删除 key，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 服务注销</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unRegister</span><span class="params">(ServiceMetaInfo serviceMetaInfo)</span> &#123;</span><br><span class="line">    kvClient.delete(ByteSequence.from(ETCD_ROOT_PATH + serviceMetaInfo.getServiceNodeKey(), StandardCharsets.UTF_8));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h5 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h5><p>服务发现根据服务名称作为前缀，从 Etcd 获取服务下的节点列表：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 服务发现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> List&lt;ServiceMetaInfo&gt; <span class="title function_">serviceDiscovery</span><span class="params">(String serviceKey)</span> &#123;</span><br><span class="line">    <span class="comment">// 前缀搜索，结尾一定要加 &#x27;/&#x27;</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">searchPrefix</span> <span class="operator">=</span> ETCD_ROOT_PATH + serviceKey + <span class="string">&quot;/&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 前缀查询</span></span><br><span class="line">        <span class="type">GetOption</span> <span class="variable">getOption</span> <span class="operator">=</span> GetOption.builder().isPrefix(<span class="literal">true</span>).build();</span><br><span class="line">        List&lt;KeyValue&gt; keyValues = kvClient.get(</span><br><span class="line">                        ByteSequence.from(searchPrefix, StandardCharsets.UTF_8),</span><br><span class="line">                        getOption)</span><br><span class="line">                .get()</span><br><span class="line">                .getKvs();</span><br><span class="line">        <span class="comment">// 解析服务信息</span></span><br><span class="line">        <span class="keyword">return</span> keyValues.stream()</span><br><span class="line">                .map(keyValue -&gt; &#123;</span><br><span class="line">                    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> keyValue.getValue().toString(StandardCharsets.UTF_8);</span><br><span class="line">                    <span class="keyword">return</span> JSONUtil.toBean(value, ServiceMetaInfo.class);</span><br><span class="line">                &#125;)</span><br><span class="line">                .collect(Collectors.toList());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;获取服务列表失败&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h5 id="服务销毁"><a href="#服务销毁" class="headerlink" title="服务销毁"></a>服务销毁</h5><p>服务销毁时，需要关闭 Etcd 客户端连接，用于关闭后释放资源，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 服务销毁</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;当前节点下线&quot;</span>);</span><br><span class="line">    <span class="comment">// 释放资源</span></span><br><span class="line">    <span class="keyword">if</span> (kvClient != <span class="literal">null</span>) &#123;</span><br><span class="line">        kvClient.close();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (client != <span class="literal">null</span>) &#123;</span><br><span class="line">        client.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h3 id="支持配置和拓展注册中心"><a href="#支持配置和拓展注册中心" class="headerlink" title="支持配置和拓展注册中心"></a>支持配置和拓展注册中心</h3><p>让开发者能够填写配置来指定使用的注册中心，并且支持自定义注册中心，让框架更易用、更利于扩展。</p>
+<p>我们可以使用工厂来创建注册中心对象、并且使用 SPI 机制来动态加载自定义的注册中心。</p>
+<hr/>
+
+<h4 id="注册中心常量"><a href="#注册中心常量" class="headerlink" title="注册中心常量"></a>注册中心常量</h4><p>在 registry 目录下新建一个类 <code>RegistryKeys</code>，用于列举所有支持的注册中心键名。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册中心键名常量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RegistryKeys</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">String</span> <span class="variable">ETCD</span> <span class="operator">=</span> <span class="string">&quot;etcd&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">String</span> <span class="variable">ZOOKEEPER</span> <span class="operator">=</span> <span class="string">&quot;zookeeper&quot;</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="注册中心工厂"><a href="#注册中心工厂" class="headerlink" title="注册中心工厂"></a>注册中心工厂</h4><p>使用工厂模式，支持根据 key 从 SPI 获取注册中心对象实例。</p>
+<p>在 registry 目录下新建一个类 <code>RegistryFactory</code>，实现工厂模式，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 注册中心工厂（用于获取注册中心对象）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RegistryFactory</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        SpiLoader.load(Registry.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认注册中心</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Registry</span> <span class="variable">DEFAULT_REGISTRY</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EtcdRegistry</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取实例</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Registry <span class="title function_">getInstance</span><span class="params">(String key)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> SpiLoader.getInstance(Registry.class, key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="注册中心接口-SPI-配置文件"><a href="#注册中心接口-SPI-配置文件" class="headerlink" title="注册中心接口 SPI 配置文件"></a>注册中心接口 SPI 配置文件</h4><p>在 META-INF&#x2F;rpc&#x2F;system 目录下新建一个文件 <code>com.sihai.rpc.registry.Registry</code>，内容如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">etcd</span>=<span class="string">com.sihai.rpc.registry.EtcdRegistry</span></span><br></pre></td></tr></table></figure>
+<hr/>
+
+<h4 id="注册中心初始化-1"><a href="#注册中心初始化-1" class="headerlink" title="注册中心初始化"></a>注册中心初始化</h4><p>由于服务提供者和服务消费者都需要和注册中心建立连接，是一个 RPC 框架启动必不可少的环节，所以可以将初始化流程放在 RpcApplication 类中。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 框架初始化，支持传入自定义配置</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> newRpcConfig</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(RpcConfig newRpcConfig)</span> &#123;</span><br><span class="line">    rpcConfig = newRpcConfig;</span><br><span class="line">    log.info(<span class="string">&quot;rpc init, config = &#123;&#125;&quot;</span>, newRpcConfig.toString());</span><br><span class="line">    <span class="comment">// 注册中心初始化</span></span><br><span class="line">    <span class="type">RegistryConfig</span> <span class="variable">registryConfig</span> <span class="operator">=</span> rpcConfig.getRegistryConfig();</span><br><span class="line">    <span class="type">Registry</span> <span class="variable">registry</span> <span class="operator">=</span> RegistryFactory.getInstance(registryConfig.getRegistry());</span><br><span class="line">    registry.init(registryConfig);</span><br><span class="line">    log.info(<span class="string">&quot;registry init, config = &#123;&#125;&quot;</span>, registryConfig);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/RPC/">RPC</a></div><div class="post_share"><div class="social-share" data-image="/img/cover/377863.jpg" data-sites="qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/04/19/2024.04.19/" title="SPI"><img class="cover" src="/img/cover/377859.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">SPI</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/04/19/2024.04.19/" title="SPI"><img class="cover" src="/img/cover/377859.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-19</div><div class="title">SPI</div></div></a></div><div><a href="/2024/04/18/2024.04.18/" title="序列化"><img class="cover" src="/img/cover/363667.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-18</div><div class="title">序列化</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%BA%94%E8%AF%A5%E6%9C%89%E4%BB%80%E4%B9%88%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">注册中心应该有什么核心能力？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Etcd"><span class="toc-number">2.</span> <span class="toc-text">Etcd</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Etcd-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%89%B9%E5%BE%81"><span class="toc-number">2.1.</span> <span class="toc-text">Etcd 数据结构与特征</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Etcd-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.1.</span> <span class="toc-text">Etcd 的核心数据结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Etcd-%E7%9A%84%E6%A0%B8%E5%BF%83%E7%89%B9%E5%BE%81"><span class="toc-number">2.1.2.</span> <span class="toc-text">Etcd 的核心特征</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Etcd-%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%9F"><span class="toc-number">2.2.</span> <span class="toc-text">Etcd 如何保证数据一致性？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Playground"><span class="toc-number">2.2.1.</span> <span class="toc-text">Playground</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Etcd-%E5%AE%89%E8%A3%85"><span class="toc-number">2.3.</span> <span class="toc-text">Etcd 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Etcd-%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E5%85%B7"><span class="toc-number">2.4.</span> <span class="toc-text">Etcd 可视化工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Etcd-Java-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">2.5.</span> <span class="toc-text">Etcd Java 客户端</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E5%85%A5%E4%BE%9D%E8%B5%96"><span class="toc-number">2.5.1.</span> <span class="toc-text">引入依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="toc-number">2.5.2.</span> <span class="toc-text">示例代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%92%8C%E4%BD%9C%E7%94%A8%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">2.5.3.</span> <span class="toc-text">常用的客户端和作用如下：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Debug-%E4%BB%A3%E7%A0%81"><span class="toc-number">2.5.4.</span> <span class="toc-text">Debug 代码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">3.</span> <span class="toc-text">存储结构设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">层级结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="toc-number">3.2.</span> <span class="toc-text">列表结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Etcd-%E5%BC%80%E5%8F%91%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">Etcd 开发实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%BC%80%E5%8F%91"><span class="toc-number">4.1.</span> <span class="toc-text">注册中心开发</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%BF%A1%E6%81%AF%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.1.</span> <span class="toc-text">注册信息定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE"><span class="toc-number">4.1.2.</span> <span class="toc-text">注册中心配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.1.3.</span> <span class="toc-text">注册中心接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Etcd-%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.1.4.</span> <span class="toc-text">Etcd 注册中心实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">4.1.4.1.</span> <span class="toc-text">注册中心初始化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C"><span class="toc-number">4.1.4.2.</span> <span class="toc-text">服务注册</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E6%B3%A8%E9%94%80"><span class="toc-number">4.1.4.3.</span> <span class="toc-text">服务注销</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="toc-number">4.1.4.4.</span> <span class="toc-text">服务发现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E9%94%80%E6%AF%81"><span class="toc-number">4.1.4.5.</span> <span class="toc-text">服务销毁</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%AF%E6%8C%81%E9%85%8D%E7%BD%AE%E5%92%8C%E6%8B%93%E5%B1%95%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83"><span class="toc-number">4.2.</span> <span class="toc-text">支持配置和拓展注册中心</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%B8%B8%E9%87%8F"><span class="toc-number">4.2.1.</span> <span class="toc-text">注册中心常量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%B7%A5%E5%8E%82"><span class="toc-number">4.2.2.</span> <span class="toc-text">注册中心工厂</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E6%8E%A5%E5%8F%A3-SPI-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">4.2.3.</span> <span class="toc-text">注册中心接口 SPI 配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%88%9D%E5%A7%8B%E5%8C%96-1"><span class="toc-number">4.2.4.</span> <span class="toc-text">注册中心初始化</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By sihai</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"log":false});</script></body></html>
